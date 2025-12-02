@@ -2,6 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
+import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
+import { authMiddleware } from "./middlewares/authMiddleware";
+import cookieParser from "cookie-parser";
 
 
 dotenv.config();
@@ -10,12 +14,13 @@ const port = process.env.PORT;
 const mongoUri = process.env.MONGO_URI!;
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://localhost:5000',
   credentials: true 
 }));
-
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
-
+app.use("/api/users",authMiddleware,userRoutes);
+app.use("/api/auth",authRoutes);
 
 
 app.get("/", (req, res) => {
