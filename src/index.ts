@@ -4,6 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
+import postRoutes from "./routes/postRoutes";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
 
@@ -21,6 +22,7 @@ app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use("/api/users",authMiddleware,userRoutes);
 app.use("/api/auth",authRoutes);
+app.use("/api/posts", postRoutes);
 
 
 app.get("/", (req, res) => {
