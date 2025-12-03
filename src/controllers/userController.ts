@@ -16,7 +16,8 @@ export const registerUser = async (req: Request, res: Response) => {
       email: req.body.email,
       password: hashPassword,
       permissions: req.body.permissions,
-      team: req.body.team
+      team: req.body.team,
+      active: req.body.active
     });
     res.status(201).json(newUser);
   } catch (error) {
@@ -46,7 +47,11 @@ export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findByIdAndDelete(id);
+    const user = await User.findByIdAndUpdate(
+      id,
+      {active: false},
+      {new: true}
+    );
 
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
@@ -78,13 +83,17 @@ export const login = async (req: Request, res: Response) =>{
   const jwtRefreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN;
 
   const findUser = await User.findOne({email});
-  if(!findUser) return res.status(404).json({message:"usuario no encontrado"});
+  if(!findUser) return res.status(404).json({message:"Usuario no encontrado"});
+
+  if(findUser.active == false)
+    return res.status(403).json({message: "Esta cuenta fue desactivada"});
+  
 
   const isMatch = await bcrypt.compare(password,findUser.password);
-  if(!isMatch) return res.status(401).json({message:"credenciales invalidas"});
+  if(!isMatch) return res.status(401).json({message:"Credenciales invalidas"});
 
   if(!jwtRefreshSecret || !jwtAccesSecret){
-    return res.status(500).json({message: "jwt no fue definido"});
+    return res.status(500).json({message: "JWT no fue definido"});
   }
 
   const accesToken = jwt.sign(
@@ -119,12 +128,13 @@ export const login = async (req: Request, res: Response) =>{
     userName: findUser.name,
     email: findUser.email,
     permissionLevel: findUser.permissions,
-    team: findUser.team
+    team: findUser.team,
+    active: findUser.active
   })
 };
 
 export const logout = async(req: Request, res: Response) =>{
   res.clearCookie('accesToken');
   res.clearCookie('refreshToken');
-  return res.json({message:"logout existo"});
+  return res.json({message:"Logout existoso"});
 };

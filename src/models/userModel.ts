@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: [String],
     enum: ["admin", "user"],
     default: []
+    },
+    active: {
+        type: Boolean,
+        default: true
     }
 })
 
