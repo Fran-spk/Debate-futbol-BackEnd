@@ -15,7 +15,8 @@ export const registerUser = async (req: Request, res: Response) => {
       name: req.body.name,
       email: req.body.email,
       password: hashPassword,
-      permissions: req.body.permissions
+      permissions: req.body.permissions,
+      team: req.body.team
     });
     res.status(201).json(newUser);
   } catch (error) {
@@ -117,7 +118,8 @@ export const login = async (req: Request, res: Response) =>{
     name: findUser.name,
     userName: findUser.name,
     email: findUser.email,
-    permissionLevel: findUser.permissions
+    permissionLevel: findUser.permissions,
+    team: findUser.team
   })
 };
 
