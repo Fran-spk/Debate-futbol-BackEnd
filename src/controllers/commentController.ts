@@ -18,7 +18,17 @@ export const getComments = async (req:Request, res: Response) =>{
 
 export const createComment = async (req: Request, res: Response) => {
     try {
-        const comment = await Comment.create(req.body);
+        const loggedUser =(req as any).user;
+
+        const newComment = {
+            content: req.body.content,
+            postId: req.body.postId,
+            user: loggedUser.userId
+        }
+
+        const comment = await Comment.create(newComment);
+        await comment.populate('user', 'name team active');
+
         res.status(201).json(comment);
 
     } catch (error) {
@@ -28,11 +38,12 @@ export const createComment = async (req: Request, res: Response) => {
 
 export const deleteComment = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params
-        const comment = await Comment.findByIdAndDelete(id);
-        if(!comment)
-            return res.status(404).json({error: 'Comentario no encontrado'})
+        const {id} = req.params;
+
+        await Comment.findByIdAndDelete(id);
+        
         res.json({message: 'Comentario  eliminado correctamente'})
+    
     } catch (error) {
         res.status(500).json({error: error})
     }

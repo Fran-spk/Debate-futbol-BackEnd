@@ -11,11 +11,14 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const user : CreateUserDto = req.body;
     const hashPassword = await bcrypt.hash(user.password, 10);
+
+    const permission = req.body.permissions || ["user"]
+
     const newUser = await User.create({
       name: req.body.name,
       email: req.body.email,
       password: hashPassword,
-      permissions: req.body.permissions,
+      permissions: permission,
       team: req.body.team,
       active: req.body.active
     });
@@ -96,7 +99,7 @@ export const login = async (req: Request, res: Response) =>{
     return res.status(500).json({message: "JWT no fue definido"});
   }
 
-  const accesToken = jwt.sign(
+  const accessToken = jwt.sign(
     {userId: findUser.id.toString(), email: findUser.email},
     jwtAccesSecret,
     {expiresIn: '1h'}
@@ -108,7 +111,7 @@ export const login = async (req: Request, res: Response) =>{
     { expiresIn: "10d" }
   );
 
-  res.cookie('accesToken', accesToken,{
+  res.cookie('accessToken', accessToken,{
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -134,7 +137,7 @@ export const login = async (req: Request, res: Response) =>{
 };
 
 export const logout = async(req: Request, res: Response) =>{
-  res.clearCookie('accesToken');
+  res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
   return res.json({message:"Logout existoso"});
 };

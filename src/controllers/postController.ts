@@ -36,8 +36,19 @@ export const getPost = async (req: Request, res: Response) =>{
 
 export const createPost = async (req: Request, res: Response) => {
     try {
-        const post = await Post.create(req.body);
+        const loggedUser = (req as any).user;
+        
+        const newPost = {
+            content: req.body.content,
+            team: req.body.team,        //arma el objeto con userid del user logueado
+            user: loggedUser.userId
+        };
+
+        const post = await Post.create(newPost);
+
+        await post.populate('user', 'name team active');
         res.status(201).json(post);
+
     } catch (error) {
         res.status(500).json({ message: 'Error al crear el post', error})
     }
@@ -47,25 +58,11 @@ export const createPost = async (req: Request, res: Response) => {
 export const deletePost = async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
-        const post = await Post.findByIdAndDelete(id);
-        if (!post)
-            return res.status(404).json({ error: 'Post no encontrado'})
+        
+        await Post.findByIdAndDelete(id);
+
         res.json({ message: 'Post eliminado correctamente'});
-    } catch (error) {
-        res.status(500).json({error: error})
-    }
-}
 
-
-export const updatePost = async (req: Request, res: Response) => {
-
-    try {
-            const {id} = req.params;
-            const post = await Post.findByIdAndUpdate(id, req.body, {new: true});
-            if (!post)
-                return res.status(404).json({ error: 'Post no encontrado'});
-
-            res.status(200).json(post);
     } catch (error) {
         res.status(500).json({error: error})
     }

@@ -4,6 +4,8 @@ import { JwtPayload } from "../types/types";
 const secretKey = process.env.JWT_SECRET!;
 const jwtAccessExpiresIn = process.env.JWT_EXPIRES_IN!;
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET!;
+import User from "../models/userModel"
+
 
 export const authMiddleware = (  req: Request,  res: Response,  next: NextFunction) => {
   const token = req.cookies.accessToken;
@@ -13,14 +15,16 @@ export const authMiddleware = (  req: Request,  res: Response,  next: NextFuncti
   }
 
   try {
-    jwt.verify(token, secretKey);
+    const decoded = jwt.verify(token, secretKey);
+    (req as any).user = decoded;    //guardar los datos de la verificacion en la request
+
     return next();
   } catch (error) {
     return validateRefreshToken(req, res, next);
   }
 };
 
-const validateRefreshToken = (
+const validateRefreshToken = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -33,14 +37,25 @@ const validateRefreshToken = (
 
   try {
     const decoded = jwt.verify(token, jwtRefreshSecret) as JwtPayload;
+
+    const foundUser = await User.findById(decoded.userId || decoded._id);
+
+    if(!foundUser)
+      return res.status(401).json({message: "Usuario no encontrado"});
+
+    const newPayload = {
+      userId: foundUser._id.toString(),
+      permissions: foundUser.permissions,
+      email: foundUser.email
+    };
+
     const accessToken = jwt.sign(
-    { _id: decoded._id },
+    newPayload,
     secretKey,
     {
       expiresIn: "1d"
     }
   );
-
 
     // Generamos nuevo access token
     res.cookie("accessToken", accessToken, {
@@ -49,6 +64,8 @@ const validateRefreshToken = (
       sameSite: "strict",
       maxAge: 60 * 1000, // 1 minuto
     });
+
+    (req as any).user = newPayload;   //pasa el usuario por el payload
 
     return next();
   } catch (error) {
