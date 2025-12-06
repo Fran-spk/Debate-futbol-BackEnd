@@ -10,7 +10,7 @@ const deleteMiddleware = (ResourceModel: Model<any>) => {
             if(!userLogueado)
                 return res.status(401).json({message: "Usuario no autenticado"})
 
-            const resource = await ResourceModel.findById(id); //trae el objeto(Post o Comment)
+            const resource = await ResourceModel.findById(id); 
 
             if(!resource)
                 return res.status(404).json({message: "Recurso no encontrado"});

@@ -99,14 +99,18 @@ export const login = async (req: Request, res: Response) =>{
     return res.status(500).json({message: "JWT no fue definido"});
   }
 
-  const accessToken = jwt.sign(
-    {userId: findUser.id.toString(), email: findUser.email},
+const accessToken = jwt.sign(
+    {
+      id: findUser._id.toString(),
+      email: findUser.email,
+      permissions: findUser.permissions
+    },
     jwtAccesSecret,
-    {expiresIn: '1h'}
+    { expiresIn: "1h" }
   );
 
     const refreshToken = jwt.sign(
-    { userId: findUser._id.toString() },
+    { id: findUser._id.toString() },
     jwtRefreshSecret,
     { expiresIn: "10d" }
   );
