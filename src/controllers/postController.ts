@@ -6,6 +6,7 @@ export const getPosts = async (req: Request, res: Response)=>{
     try {
         const {team} = req.query;
         const filter: any ={};
+
         if(team){
             filter.team = team;
         }
@@ -19,6 +20,25 @@ export const getPosts = async (req: Request, res: Response)=>{
         res.status(500).json({error: error})
     }
 };
+
+
+export const getPostsByUser = async(req: Request, res: Response) =>{
+    try {
+        const {userId} = req.params;
+
+        const posts = await Post.find({user: userId})
+            .populate('user', 'name team')
+            .sort({createdAt: -1})
+
+            res.status(200).json(posts)
+
+        } catch (error) {
+            
+            res.status(500).json({error: error })
+    }
+}
+
+
 
 export const getPost = async (req: Request, res: Response) =>{
     try {

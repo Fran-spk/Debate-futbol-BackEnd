@@ -1,4 +1,4 @@
-import { createPost, deletePost, getPost, getPosts } from "../controllers/postController"
+import { createPost, deletePost, getPost, getPosts, getPostsByUser } from "../controllers/postController"
 import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import deleteMiddleware from "../middlewares/deleteMiddleware";
@@ -9,6 +9,7 @@ const router = express.Router();
 //público
 router.get("/", getPosts);
 router.get("/:id", getPost);
+router.get("/user/:userId", getPostsByUser)
 
 //necesita estar logueado
 router.post("/",authMiddleware, createPost);
