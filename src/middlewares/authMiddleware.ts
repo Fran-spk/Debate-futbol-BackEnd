@@ -44,7 +44,7 @@ const validateRefreshToken = async (
       return res.status(401).json({message: "Usuario no encontrado"});
 
     const newPayload = {
-      id: foundUser._id.toString(),
+      userId: foundUser._id.toString(),
       permissions: foundUser.permissions,
       email: foundUser.email
     };

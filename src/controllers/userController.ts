@@ -101,7 +101,7 @@ export const login = async (req: Request, res: Response) =>{
 
 const accessToken = jwt.sign(
     {
-      id: findUser._id.toString(),
+      userId: findUser._id.toString(),
       email: findUser.email,
       permissions: findUser.permissions
     },
@@ -110,7 +110,7 @@ const accessToken = jwt.sign(
   );
 
     const refreshToken = jwt.sign(
-    { id: findUser._id.toString() },
+    { userId: findUser._id.toString() },
     jwtRefreshSecret,
     { expiresIn: "10d" }
   );
