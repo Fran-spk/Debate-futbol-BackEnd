@@ -1,4 +1,5 @@
 import {
+  getUser,
   login,
   logout,
   registerUser
@@ -13,10 +14,7 @@ const router = express.Router();
 router.post("/register",validationMiddleware(CreateUserDto), registerUser);
 router.post("/login",login);
 router.post("/logout",logout);
-router.get("/me", authMiddleware, (req, res) => {
-  const user = (req as any).user;
-  res.json(user);
-});
+router.get("/me", authMiddleware,getUser);
 
 
 export default router;

@@ -1,6 +1,7 @@
 import {
   deleteUser,
   getUser,
+  getUserById,
   getUsers,
   updateUser,
 } from "../controllers/userController";
@@ -9,7 +10,7 @@ import express from "express";
 const router = express.Router();
 
 router.get("/", getUsers);
-router.get("/:id", getUser);
+router.get("/:id", getUserById);
 router.delete("/:id", deleteUser);
 router.put("/:id",updateUser);
 

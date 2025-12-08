@@ -37,9 +37,27 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const targetUserId = req.params.id;    
+    if (!targetUserId) {
+        return res.status(400).json({ message: "ID de usuario requerido." });
+    }
+    const user = await User.findById(targetUserId).select('-password'); 
+    if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error al obtener usuario:", error);
+    res.status(500).json({ error: "Error interno del servidor." }); 
+  }
+};
+
 export const getUser = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.params.id);
+    const userId = (req as any).user.userId || (req as any).user._id;
+     const user = await User.findById(userId);
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error });
@@ -68,7 +86,7 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findByIdAndUpdate(id, req.body);
+    const user = await User.findByIdAndUpdate(id, req.body, { new: true });
 
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
@@ -130,11 +148,11 @@ const accessToken = jwt.sign(
   });
 
   return res.json({
-    id: findUser._id,
+    _id: findUser._id,
     name: findUser.name,
     userName: findUser.name,
     email: findUser.email,
-    permissionLevel: findUser.permissions,
+    permissions: findUser.permissions,
     team: findUser.team,
     active: findUser.active
   })

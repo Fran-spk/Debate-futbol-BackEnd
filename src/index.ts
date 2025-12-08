@@ -21,7 +21,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
-app.use("/api/users",authMiddleware,userRoutes);
+app.use("/api/users",userRoutes);
 app.use("/api/auth",authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
