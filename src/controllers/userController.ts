@@ -90,6 +90,22 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+export const activeUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+        const user = await User.findByIdAndUpdate(
+      id,
+      {active: true},
+      {new: true}
+    );
+
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    res.json({ message: "Usuario activado correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+}
 
 
 export const updateUser = async (req: Request, res: Response) => {

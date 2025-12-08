@@ -1,4 +1,5 @@
 import {
+  activeUser,
   deleteUser,
   getUserById,
   getUsers,
@@ -11,6 +12,7 @@ const router = express.Router();
 router.get("/", getUsers);
 router.get("/:id", getUserById);
 router.delete("/:id", deleteUser);
+router.patch("/:id/activate", activeUser);
 router.put("/:id",updateUser);
 
 
