@@ -1,6 +1,5 @@
 import {
   deleteUser,
-  getUser,
   getUserById,
   getUsers,
   updateUser,

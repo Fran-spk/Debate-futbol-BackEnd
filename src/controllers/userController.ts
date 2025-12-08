@@ -30,8 +30,16 @@ export const registerUser = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.find();
+
+    const loggedUser = (req as any).user;
+    let filter: any = { active: true };  
+
+    if (loggedUser && loggedUser.permissions && loggedUser.permissions.includes("admin")) {
+      filter = {}; 
+    }
+    const users = await User.find(filter);
     res.status(200).json(users);
+  
   } catch (error) {
     res.status(500).json({ error: error });
   }
@@ -81,6 +89,8 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 };
+
+
 
 export const updateUser = async (req: Request, res: Response) => {
   try {

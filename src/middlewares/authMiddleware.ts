@@ -8,11 +8,17 @@ import User from "../models/userModel"
 
 
 export const authMiddleware = (  req: Request,  res: Response,  next: NextFunction) => {
-  const token = req.cookies.accessToken;
+  let token = req.cookies.accessToken;
+  const authHeader = req.headers.authorization;
+
+  if(!token && authHeader && authHeader.startsWith("Bearer ")){
+    token = authHeader.split("")[1];
+  }
 
   if (!token) {
     return validateRefreshToken(req, res, next);
   }
+
 
   try {
     const decoded = jwt.verify(token, secretKey);
@@ -44,7 +50,7 @@ const validateRefreshToken = async (
       return res.status(401).json({message: "Usuario no encontrado"});
 
     const newPayload = {
-      userId: foundUser._id.toString(),
+      id: foundUser._id.toString(),
       permissions: foundUser.permissions,
       email: foundUser.email
     };
