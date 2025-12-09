@@ -1,3 +1,4 @@
+import { isLikeByPost } from "../controllers/likesController";
 import {
   activeUser,
   deleteUser,
@@ -6,6 +7,7 @@ import {
   updateUser,
 } from "../controllers/userController";
 import express from "express";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../types/types";
 const secretKey = process.env.JWT_SECRET!;
-const jwtAccessExpiresIn = process.env.JWT_EXPIRES_IN!;
+
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET!;
 import User from "../models/userModel"
 
@@ -10,7 +10,6 @@ import User from "../models/userModel"
 export const authMiddleware = (  req: Request,  res: Response,  next: NextFunction) => {
   let token = req.cookies.accessToken;
   const authHeader = req.headers.authorization;
-
   if(!token && authHeader && authHeader.startsWith("Bearer ")){
     token = authHeader.split("")[1];
   }
@@ -22,7 +21,7 @@ export const authMiddleware = (  req: Request,  res: Response,  next: NextFuncti
 
   try {
     const decoded = jwt.verify(token, secretKey);
-    (req as any).user = decoded;    //guardar los datos de la verificacion en la request
+    (req as any).user = decoded;    
 
     return next();
   } catch (error) {
@@ -30,51 +29,48 @@ export const authMiddleware = (  req: Request,  res: Response,  next: NextFuncti
   }
 };
 
-const validateRefreshToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const validateRefreshToken = async (req: Request,res: Response,next: NextFunction) => {
   const token = req.cookies.refreshToken;
-
+  const jwtAccesSecret = process.env.JWT_SECRET!;
   if (!token) {
     return res.status(401).json({ message: "El token es requerido" });
   }
-
   try {
-    const decoded = jwt.verify(token, jwtRefreshSecret) as JwtPayload;
+     const decoded = jwt.verify(token, jwtRefreshSecret) as JwtPayload;
 
     const foundUser = await User.findById(decoded.userId || decoded._id);
-
+    console.log(foundUser);
     if(!foundUser)
       return res.status(401).json({message: "Usuario no encontrado"});
 
-    const newPayload = {
-      id: foundUser._id.toString(),
+    const user = {
+      _id: foundUser._id.toString(),
       permissions: foundUser.permissions,
       email: foundUser.email
     };
-
     const accessToken = jwt.sign(
-    newPayload,
-    secretKey,
-    {
-      expiresIn: "1d"
-    }
-  );
+      {
+        userId: user._id.toString(),
+        email: user.email,
+        permissions: user.permissions
+      },
+      jwtAccesSecret,
+      { expiresIn: "5m" }
+    );
 
-    // Generamos nuevo access token
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
-      maxAge: 60 * 1000, // 1 minuto
+      maxAge: 60 * 1000 * 10, 
     });
 
-    (req as any).user = newPayload;   
+    (req as any).user = user;   
 
     return next();
+
   } catch (error) {
-    return res.status(401).json({ message: "Refresh token inválido", error });
+    console.log(error);
   }
+   
 };

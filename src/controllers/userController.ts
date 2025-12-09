@@ -125,9 +125,8 @@ export const updateUser = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) =>{
   const {email, password} = req.body;
   const jwtAccesSecret = process.env.JWT_SECRET;
-  const jwtAccesExpiresIn = process.env.JWT_EXPIRES_IN;
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
-  const jwtRefreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN;
+
 
   const findUser = await User.findOne({email});
   if(!findUser) return res.status(404).json({message:"Usuario no encontrado"});
@@ -150,7 +149,7 @@ const accessToken = jwt.sign(
       permissions: findUser.permissions
     },
     jwtAccesSecret,
-    { expiresIn: "1h" }
+    { expiresIn: "5m" }
   );
 
     const refreshToken = jwt.sign(
@@ -163,7 +162,7 @@ const accessToken = jwt.sign(
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60* 1000
+    maxAge: 60 * 1000 * 6
   });
 
     res.cookie('refreshToken', refreshToken,{

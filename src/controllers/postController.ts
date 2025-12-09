@@ -1,24 +1,31 @@
 import {Request, Response} from "express";
 import Post from "../models/postModel";
+import like from "../models/likeModel";
 
+export const getPosts = async (req: Request, res: Response) => {
+  try {
+    const { team } = req.query;
+    const filter: any = {};
 
-export const getPosts = async (req: Request, res: Response)=>{
-    try {
-        const {team} = req.query;
-        const filter: any ={};
-
-        if(team){
-            filter.team = team;
-        }
-
-        const posts = await Post.find(filter)   //filtra
-            .populate('user', 'name team')  //trae el nombre de usuario y el equipo 
-            .sort({createdAt: -1});  //ordena del mas nuevo al mas viejo
-
-        res.status(200).json(posts);
-    } catch (error) {
-        res.status(500).json({error: error})
+    if (team) {
+      filter.team = team;
     }
+
+    const posts = await Post.find(filter)
+      .populate("user", "name team")
+      .sort({ createdAt: -1 });
+
+    const postsWithLikes = await Promise.all(
+      posts.map(async (post) => {
+        const countLikes = await like.countDocuments({ post: post._id });
+        return { ...post.toObject(), countLikes };
+      })
+    );
+
+    res.status(200).json(postsWithLikes);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
 };
 
 
@@ -29,8 +36,14 @@ export const getPostsByUser = async(req: Request, res: Response) =>{
         const posts = await Post.find({user: userId})
             .populate('user', 'name team')
             .sort({createdAt: -1})
+            const postsWithLikes = await Promise.all(
+            posts.map(async (post) => {
+                const countLikes = await like.countDocuments({ post: post._id });
+                return { ...post.toObject(), countLikes };
+            })
+            );
 
-            res.status(200).json(posts)
+            res.status(200).json(postsWithLikes)
 
         } catch (error) {
             
@@ -47,7 +60,6 @@ export const getPost = async (req: Request, res: Response) =>{
         if (!post) {
             return res.status(404).json({ error: 'Post no encontrado' });
         }
-
         res.status(200).json(post);
     } catch (error) {
         res.status(500).json({error: error})
@@ -87,3 +99,5 @@ export const deletePost = async (req: Request, res: Response) => {
         res.status(500).json({error: error})
     }
 }
+
+

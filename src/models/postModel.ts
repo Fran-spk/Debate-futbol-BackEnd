@@ -14,7 +14,7 @@ const postSchema = new mongoose.Schema({
     team:{
         type: String,
         required: false,
-        enum:{ //solo acepta los strings que están en la lista
+        enum:{ 
             values: teams as string[],
             message: '{VALUE} no es un equipo válido.'
         },
