@@ -9,6 +9,7 @@ import User from "../models/userModel"
 
 export const authMiddleware = (  req: Request,  res: Response,  next: NextFunction) => {
   let token = req.cookies.accessToken;
+  console.log(token)
   const authHeader = req.headers.authorization;
   if(!token && authHeader && authHeader.startsWith("Bearer ")){
     token = authHeader.split("")[1];
@@ -32,14 +33,13 @@ export const authMiddleware = (  req: Request,  res: Response,  next: NextFuncti
 const validateRefreshToken = async (req: Request,res: Response,next: NextFunction) => {
   const token = req.cookies.refreshToken;
   const jwtAccesSecret = process.env.JWT_SECRET!;
+
   if (!token) {
     return res.status(401).json({ message: "El token es requerido" });
   }
   try {
      const decoded = jwt.verify(token, jwtRefreshSecret) as JwtPayload;
-
     const foundUser = await User.findById(decoded.userId || decoded._id);
-    console.log(foundUser);
     if(!foundUser)
       return res.status(401).json({message: "Usuario no encontrado"});
 

@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import postRoutes from "./routes/postRoutes";
+import notificationRoutes from "./routes/postRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
@@ -19,17 +20,15 @@ app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true 
 }));
+
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use("/api/users",authMiddleware,userRoutes);
+app.use("/api/notifications",authMiddleware,notificationRoutes);
 app.use("/api/auth",authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
