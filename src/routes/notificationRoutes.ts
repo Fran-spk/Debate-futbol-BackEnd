@@ -8,8 +8,8 @@ import {
 
 const router = Router();
 
-router.post("/:postId/:userId/:type",createNotification);
-router.get("/getNotifications",getAllNotifications);
+router.post("/",createNotification);
+router.get("/",getAllNotifications);
 router.patch("/readAll",AllAsRead);
 
 export default router;

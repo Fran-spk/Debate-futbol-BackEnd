@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import postRoutes from "./routes/postRoutes";
-import notificationRoutes from "./routes/postRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";

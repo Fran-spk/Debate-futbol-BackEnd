@@ -9,7 +9,6 @@ import User from "../models/userModel"
 
 export const authMiddleware = (  req: Request,  res: Response,  next: NextFunction) => {
   let token = req.cookies.accessToken;
-  console.log(token)
   const authHeader = req.headers.authorization;
   if(!token && authHeader && authHeader.startsWith("Bearer ")){
     token = authHeader.split("")[1];
