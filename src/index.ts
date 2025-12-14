@@ -1,45 +1,64 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import serverless from "serverless-http";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import postRoutes from "./routes/postRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import { authMiddleware } from "./middlewares/authMiddleware";
-import cookieParser from "cookie-parser";
-
 
 dotenv.config();
+
 const app = express();
-const port = process.env.PORT;
-const mongoUri = process.env.MONGO_URI!;
+
+/* ===== CORS ===== */
+const allowedOrigins: string[] = [
+  "http://localhost:5173",
+  process.env.CLIENT_URL
+].filter((o): o is string => Boolean(o));
 
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true 
+  origin: allowedOrigins,
+  credentials: true
 }));
 
+/* ===== Middlewares ===== */
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
-app.use("/api/users",userRoutes);
-app.use("/api/notifications",authMiddleware,notificationRoutes);
-app.use("/api/auth",authRoutes);
+
+/* ===== Mongo ===== */
+let isConnected = false;
+async function connectDB() {
+  if (isConnected) return;
+  await mongoose.connect(process.env.MONGO_URI!);
+  isConnected = true;
+}
+
+/* ===== Routes ===== */
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/notifications", authMiddleware, notificationRoutes);
 
+/* ===== LOCAL ===== */
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`API running on http://localhost:${PORT}`);
+    });
+  });
+}
 
-const connectToDb = async () => {
-  try {
-    await mongoose.connect(mongoUri, {});
-    console.log("MongoDB conectado");
-  } catch (error) {
-    console.error(`Error de conexión a MongoDB: ${error}`);
-  }
-};
-connectToDb();
+/* ===== VERCEL ===== */
+export default async function handler(req: any, res: any) {
+  await connectDB();
+  return serverless(app)(req, res);
+}
