@@ -4,6 +4,8 @@ import { CreateUserDto } from "../dto/create-user.dto";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import {firebaseAuth} from "../config/firebase-admin";
+
 
 dotenv.config();
 
@@ -188,3 +190,87 @@ export const logout = async(req: Request, res: Response) =>{
   res.clearCookie('refreshToken');
   return res.json({message:"Logout existoso"});
 };
+
+
+export const googleLogin = async(req: Request, res: Response) =>{
+  try {
+    const jwtAccesSecret = process.env.JWT_SECRET;
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+    
+    const {firebaseToken} = req.body;
+
+    if(!jwtRefreshSecret || !jwtAccesSecret){
+      return res.status(500).json({message: "JWT no fue definido"});
+    }
+
+
+    if(!firebaseToken){
+      return res.status(400).json({message: "Token de Firebase es requerido"});
+    }
+
+
+    const decodedToken = await firebaseAuth.verifyIdToken(firebaseToken);
+
+    const {uid, email, name} = decodedToken;
+
+    let user = await User.findOne({email});
+
+
+  if(!user){
+    user = await User.create({
+
+      name: name,
+      email: email,
+      password: uid,
+      permissions: ["user"],
+      active: true
+    }
+  )};
+
+    //lo mismo que en el login normal
+
+  const accessToken = jwt.sign(
+  {
+    userId: user._id.toString(),
+    email: user.email,
+    permissions: user.permissions
+  },
+  jwtAccesSecret,
+  { expiresIn: "5m" }
+  );
+
+  const refreshToken = jwt.sign(
+  { userId: user._id.toString() },
+  jwtRefreshSecret,
+  { expiresIn: "10d" }
+  );
+
+  res.cookie('accessToken', accessToken,{
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 1000 * 6
+  });
+
+    res.cookie('refreshToken', refreshToken,{
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 1000 * 60 * 24 * 7
+  });
+
+  return res.json({
+    _id: user._id,
+    name: user.name,
+    userName: user.name,
+    email: user.email,
+    permissions: user.permissions,
+    team: user.team,
+    active: user.active
+  });
+    
+  } catch (error) {
+    console.error('Social login error:', error);
+    return res.status(401).json({ message: "Token inválido" });
+  }
+}

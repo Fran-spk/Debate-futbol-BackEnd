@@ -11,8 +11,12 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
-router.get("/", getUsers);
+//info pública
 router.get("/:id", getUserById);
+
+
+router.use(authMiddleware);
+router.get("/", getUsers);
 router.delete("/:id", deleteUser);
 router.patch("/:id/activate", activeUser);
 router.put("/:id",updateUser);

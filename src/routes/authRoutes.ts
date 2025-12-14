@@ -1,5 +1,6 @@
 import {
   getUser,
+  googleLogin,
   login,
   logout,
   registerUser
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.post("/register",validationMiddleware(CreateUserDto), registerUser);
 router.post("/login",login);
+router.post("/google",googleLogin);
 router.post("/logout",logout);
 router.get("/me", authMiddleware,getUser);
 router.get("/isLike/:postId",authMiddleware, isLikeByPost);
