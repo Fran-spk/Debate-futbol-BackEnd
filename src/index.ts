@@ -35,9 +35,17 @@ app.use(express.json({ limit: "10mb" }));
 let isConnected = false;
 async function connectDB() {
   if (isConnected) return;
-  await mongoose.connect(process.env.MONGO_URI!);
-  isConnected = true;
+  try {
+    await mongoose.connect(process.env.MONGO_URI!);
+    console.log("MongoDB conectado");
+    isConnected = true;
+  } catch (error) {
+    console.error("Error conectando a MongoDB:", error);
+    throw error;
+  }
 }
+
+/* ===== Ruta de prueba ===== */
 app.get("/", (req, res) => {
   res.send("Servidor funcionando");
 });
@@ -62,6 +70,11 @@ if (process.env.NODE_ENV !== "production") {
 
 /* ===== VERCEL ===== */
 export default async function handler(req: any, res: any) {
-  await connectDB();
-  return serverless(app)(req, res);
+  try {
+    await connectDB();
+    return serverless(app)(req, res);
+  } catch (error) {
+    console.error("Error en handler:", error);
+    return res.status(500).json({ error: "Error conectando a la DB" });
+  }
 }
