@@ -191,8 +191,6 @@ export const logout = async (req: Request, res: Response) => {
         secure: true,      
         sameSite: "none" as const,  
     };
-
-    // Aplicar las opciones al comando clearCookie
     res.clearCookie('accessToken', cookieOptions);
     res.clearCookie('refreshToken', cookieOptions);
 
@@ -235,7 +233,6 @@ export const googleLogin = async(req: Request, res: Response) =>{
     }
   )};
 
-    //lo mismo que en el login normal
 
   const accessToken = jwt.sign(
   {
@@ -253,17 +250,18 @@ export const googleLogin = async(req: Request, res: Response) =>{
   { expiresIn: "10d" }
   );
 
+
   res.cookie('accessToken', accessToken,{
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 60 * 1000 * 6
   });
 
     res.cookie('refreshToken', refreshToken,{
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 60 * 1000 * 60 * 24 * 7
   });
 
