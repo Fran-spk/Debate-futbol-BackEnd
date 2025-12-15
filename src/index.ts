@@ -16,19 +16,6 @@ dotenv.config();
 
 const app = express();
 
-/* ===== CORS ===== */
-const allowedOrigins: string[] = [
-  "http://localhost:5173",
-  process.env.CLIENT_URL
-].filter((o): o is string => Boolean(o));
-
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
-
-
-
 /* ===== Mongo ===== */
 let isConnected = false;
 async function connectDB() {
