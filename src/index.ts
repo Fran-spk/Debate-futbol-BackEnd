@@ -51,7 +51,6 @@ if (process.env.NODE_ENV !== "production") {
 /* ===== VERCEL ===== */
 export default async function handler(req: any, res: any) {
   try {
-    await connectDB();
     return serverless(app)(req, res);
   } catch (error) {
     console.error("Error en handler:", error);
