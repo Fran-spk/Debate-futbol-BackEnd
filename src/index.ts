@@ -32,7 +32,7 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 
-/* ===== Mongo (Conexión Serverless Optimizada) ===== */
+
 let isConnected = false;
 async function connectDB() {
   if (isConnected && mongoose.connection.readyState === 1) {
@@ -41,8 +41,6 @@ async function connectDB() {
   }
   try {
     await mongoose.connect(process.env.MONGO_URI!, {
-      // Opciones CLAVE para serverless:
-      // @ts-ignore
       bufferCommands: false, 
       serverSelectionTimeoutMS: 5000, 
     });
@@ -82,21 +80,14 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-/* ========================================= */
-/* ===== VERCEL HANDLER (MÉTODO NATIVO) ===== */
-/* ========================================= */
-// Vercel llama a esta función. Ejecuta la lógica de Express nativamente.
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   try {
-    // 1. Asegura la conexión a la DB
+
     await connectDB(); 
-    
-    // 2. Delega el control de la solicitud a Express
-    // Esto reemplaza la función de serverless-http
     app(req, res);
   } catch (error) {
     console.error("Error en handler o DB:", error);
-    // Si la conexión a la DB falla, devuelve 500
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ error: "Error interno del servidor. Revisar logs." }));

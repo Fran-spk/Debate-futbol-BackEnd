@@ -163,14 +163,14 @@ const accessToken = jwt.sign(
   res.cookie('accessToken', accessToken,{
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 60 * 1000 * 6
   });
 
     res.cookie('refreshToken', refreshToken,{
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 60 * 1000 * 60 * 24 * 7
   });
 
