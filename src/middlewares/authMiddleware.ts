@@ -60,7 +60,7 @@ const validateRefreshToken = async (req: Request,res: Response,next: NextFunctio
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 60 * 1000 * 10, 
     });
 
