@@ -185,10 +185,18 @@ const accessToken = jwt.sign(
   })
 };
 
-export const logout = async(req: Request, res: Response) =>{
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
-  return res.json({message:"Logout existoso"});
+export const logout = async (req: Request, res: Response) => {
+    const cookieOptions = {
+        httpOnly: true,
+        secure: true,      
+        sameSite: "none" as const,  
+    };
+
+    // Aplicar las opciones al comando clearCookie
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
+
+    return res.status(200).json({ message: "Logout exitoso" });
 };
 
 
