@@ -38,6 +38,9 @@ async function connectDB() {
   await mongoose.connect(process.env.MONGO_URI!);
   isConnected = true;
 }
+app.get("/", (req, res) => {
+  res.send("Servidor funcionando");
+});
 
 /* ===== Routes ===== */
 app.use("/api/users", userRoutes);
