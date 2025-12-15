@@ -34,7 +34,7 @@ let isConnected = false;
 async function connectDB() {
   if (isConnected) return;
   try {
-    await mongoose.connect(process.env.MONGO_URI!);
+    await mongoose.connect("mongodb+srv://franspk:fran2214@clusterspk.ddxmn5b.mongodb.net/debate_futbol_db?appName=ClusterSpk");
     console.log("MongoDB conectado");
     isConnected = true;
   } catch (error) {
